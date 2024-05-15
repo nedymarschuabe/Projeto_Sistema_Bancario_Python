@@ -6,6 +6,8 @@ def menu_principal():
     3 - Extrato
     4 - Cadastrar Cliente
     5 - Listar Clientes
+    6 - Cadastrar Conta Corrente
+    7 - Listar Contas Corrente
     0 - Sair
     """
     return menu
@@ -70,7 +72,7 @@ def extrato_conta(operacao, extrato, saldo):
         contador += 1
     print(f"Saldo: R$ {saldo}")
 
-def cadastro_cliente(operacao, lista_clientes, codigo):
+def cadastro_cliente(operacao, lista_clientes, codigo, lista_contas_corrente, codigo_cc):
     print("\n >>>>>", operacao)
     codigo += 1
     print(">>> Dados Pessoais")
@@ -80,9 +82,10 @@ def cadastro_cliente(operacao, lista_clientes, codigo):
     #validacao CPF
     cpf_string = input("CPF: ")
     cpf = ''.join(filter(str.isdigit, cpf_string))
-    for cliente in lista_clientes:
-        if cliente['cpf'] == cpf:
-            print("CPF já cadastrado.")
+    if lista_clientes:
+        for cliente in lista_clientes:
+            if cpf in cliente and cliente['cpf'] == cpf:
+                print("CPF já cadastrado.")
 
     print(">>> Dados Endereço")
     logradouro = input("Logradouro: ")
@@ -109,7 +112,18 @@ def cadastro_cliente(operacao, lista_clientes, codigo):
         'endereco': endereco
     })
     print("Cliente cadastrado com sucesso!")
-    return codigo
+
+    while True:
+        criar_conta_cc = input("Deseja criar uma conta corrente para esse cliente? (Sim ou Não)")
+        if criar_conta_cc.upper() == "SIM" or criar_conta_cc.upper() == "S":
+            codigo_cc = cadastro_cc('Cadastro Conta Corrente', lista_contas_corrente, lista_clientes, codigo, codigo_cc)
+            break
+        elif criar_conta_cc.upper() == "NAO" or criar_conta_cc.upper() == "N" or criar_conta_cc.upper() == "NÃO":
+            break
+        else:
+            print("Opção inválida. Por favor, digite uma opção válida (Sim ou Não)!")
+    
+    return codigo, codigo_cc
 
 def listar_clientes(operacao, lista_clientes):
     print("\n >>>>>", operacao)
@@ -118,12 +132,59 @@ def listar_clientes(operacao, lista_clientes):
             print(f"{coluna.capitalize()}: {valor}")
         print("")
 
+def cadastro_cc(operacao, lista_conta, lista_clientes, cod_cliente, codigo_cc):
+    print("\n >>>>>", operacao)
+    codigo_cc += 1
+    agencia = "001"
+    numero_conta = codigo_cc
+    cod_cli = 0
+    
+    if cod_cliente > 0:
+        cod_cli = cod_cliente
+    else:
+        nome_cliente = input("Digite o nome do cliente: ").upper()
+
+        print("Antes do loop")
+        for cliente in lista_clientes:
+            print("Entrou loop")
+            if nome_cliente.upper() == cliente['nome'].upper():
+                print("Entrou IF")
+                cod_cli = cliente['codigo']
+
+    lista_conta.append({
+        'agencia': agencia,
+        'numero_conta': numero_conta,
+        'cliente': cod_cli
+    })
+
+    print("\n Conta Corrente Cadastrada com sucesso!")
+
+    # Mostra na tela a conta criada
+    lista_cc('Lista Conta Corrente', lista_conta, cod_cli)
+
+    return numero_conta
+
+def lista_cc(operacao, lista_contas, cod_cli):
+    print("\n >>>>>", operacao)
+    for cont_corr in lista_contas:
+        if 'cliente' in cont_corr and int(cod_cli) == cont_corr['cliente']:
+            for colunacont, valorcont in cont_corr.items():
+                print(f"{colunacont.capitalize()}: {valorcont}")
+            print("")
+        else:
+            for colunacont, valorcont in cont_corr.items():
+                print(f"{colunacont.capitalize()}: {valorcont}")
+            print("")
+
+
 extrato = []
 clientes = []
+contas_corrente = []
 saldo_total = 0.0
 quantidade_saque = 1
 status = ""
 codigo_cliente = 0
+codigo_cc = 0
 
 while True:
     while True:
@@ -141,10 +202,16 @@ while True:
             extrato_conta(descoperacao, extrato, saldo_total)
         elif numoperacao == "4":
             descoperacao = 'Cadastro'
-            codigo_cliente = cadastro_cliente(descoperacao, clientes, codigo_cliente)
+            codigo_cliente, codigo_cc = cadastro_cliente(descoperacao, clientes, codigo_cliente, contas_corrente, codigo_cc)
         elif numoperacao == "5":
             descoperacao = 'Lista de Clientes'
             listar_clientes(descoperacao, clientes)
+        elif numoperacao == "6":
+            descoperacao = 'Cadastro Conta Corrente'
+            cadastro_cc(descoperacao, contas_corrente, clientes, 0, codigo_cc)
+        elif numoperacao == "7":
+            descoperacao = 'Listar Contas Corrente'
+            lista_cc(descoperacao, contas_corrente, 0)
         elif numoperacao == "0":
             descoperacao = 'Sair'
             break
