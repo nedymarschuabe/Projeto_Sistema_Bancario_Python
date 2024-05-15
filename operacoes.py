@@ -1,3 +1,23 @@
+def saque(operacao, valor, saldo, quantidade):
+    extrato.append(f"{operacao} de R$ {valor}")
+    saldo -= valor  
+    quantidade += 1
+    print("Valor sacado com sucesso!")
+    return saldo
+
+def deposito(operacao, valor, saldo):
+    extrato.append(f"{operacao} de R$ {valor}")
+    saldo += valor
+    print("Valor depositado com sucesso!")
+    return saldo
+
+def extrato_conta(extrato, saldo):
+    contador = 1
+    for transacao in extrato:
+        print(f"{contador} - {transacao}")
+        contador += 1
+    print(f"Saldo: R$ {saldo}")
+
 menu = """
     OPERAÇÕES
     1 - Sacar
@@ -7,6 +27,8 @@ menu = """
 """
 extrato = []
 saldo_total = 0.0
+quantidade_saque = 1
+
 while True:
     while True:
         print (menu)
@@ -29,7 +51,6 @@ while True:
 
     print(">>>>> Operação: ", descoperacao)
     if numoperacao == "1":
-        quantidade_saque = 1
         while True:
             erro = 0
             if quantidade_saque > 3:
@@ -50,10 +71,7 @@ while True:
                 erro = 1
             
             if erro == 0:
-                extrato.append(f"{descoperacao} de R$ {valor_saque}")
-                saldo_total -= valor_saque  
-                quantidade_saque += 1
-                print("Valor sacado com sucesso!")   
+                saldo_total = saque(descoperacao, valor_saque, saldo_total, quantidade_saque) 
             
             
             continuacao = input("Deseja continuar sacando? (Sim ou Não) ")
@@ -74,15 +92,9 @@ while True:
             else:
                 break
         
-        extrato.append(f"{descoperacao} de R$ {valor_deposito}")
-        saldo_total += valor_deposito
-        print("Valor depositado com sucesso!")
+        saldo_total = deposito(descoperacao, valor_deposito, saldo_total)
     elif numoperacao == "3":
-        contador = 1
-        for transacao in extrato:
-            print(f"{contador} - {transacao}")
-            contador += 1
-        print(f"Saldo: R$ {saldo_total}")
+        extrato_conta(extrato, saldo_total)
     else:
         print("Volte Sempre... Tchau!")
         break
